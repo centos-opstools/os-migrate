@@ -1,4 +1,5 @@
-from __future__ import print_function, absolute_import
+from __future__ import print_function
+from __future__ import absolute_import
 
 import argparse
 import json
@@ -11,6 +12,7 @@ import sys
 
 LOG = logging.getLogger(__name__)
 occ = os_client_config.OpenStackConfig()
+
 
 def parse_args():
     p = argparse.ArgumentParser()
@@ -43,6 +45,7 @@ def parse_args():
 
     return p.parse_args()
 
+
 def main():
     args = parse_args()
     logging.basicConfig(level=args.loglevel)
@@ -74,8 +77,9 @@ def main():
             continue
         LOG.info('exporting {} data'.format(ext.name))
         dumper = ext.plugin(sdk)
-        resources = dumper.export()
-        with open(os.path.join(datadir, '{}.json'.format(ext.name)), 'w') as fd:
+        resources = dumper.store()
+        with open(os.path.join(datadir,
+                               '{}.json'.format(ext.name)), 'w') as fd:
             json.dump(resources, fd, indent=2)
 
     LOG.info('finished export')

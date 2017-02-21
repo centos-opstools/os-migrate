@@ -1,13 +1,14 @@
-from __future__ import print_function,absolute_import
+from __future__ import print_function
+from __future__ import absolute_import
 
-import logging
-from . import base
+import os_migrate.ds.base as base
+
 
 class Datasource (base.Datasource):
 
     description = '''Migration driver for the identity service (Keystone)'''
 
-    def export(self):
+    def store(self):
         resources = {}
 
         self.export_projects(resources)
@@ -15,7 +16,7 @@ class Datasource (base.Datasource):
 
         return resources
 
-    def import(self, resources):
+    def load(self, resources):
         for rtype, rdata in resources.items:
             importfunc = getattr(self, 'import_{}'.format(rtype), None)
             if importfunc is None:

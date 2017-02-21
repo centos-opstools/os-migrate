@@ -1,12 +1,14 @@
-from __future__ import print_function,absolute_import
+from __future__ import print_function
+from __future__ import absolute_import
 
-from . import base
+import os_migrate.ds.base as base
+
 
 class Datasource (base.Datasource):
 
     description = '''Migration driver for the compute service (Nova)'''
 
-    def export(self):
+    def store(self):
         resources = {}
 
         self.export_keypairs(resources)
