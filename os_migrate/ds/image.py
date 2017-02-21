@@ -19,3 +19,6 @@ class Datasource (base.Datasource):
         images = resources['images'] = []
         for image in self.sdk.image.images():
             images.append(image.to_dict())
+
+    def load(self, resources):
+        raise NotImplementedError('load')

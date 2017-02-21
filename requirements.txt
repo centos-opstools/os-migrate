@@ -1,4 +1,5 @@
+cliff
 os-client-config
 python-openstackclient
-stevedore
 six
+stevedore
