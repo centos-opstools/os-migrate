@@ -26,7 +26,15 @@ class Datasource (base.Datasource):
     def export_projects(self, resources):
         projects = resources['projects'] = []
         for project in self.sdk.identity.projects():
+            self.log.debug('exporting project %s (%s)',
+                           project.name, project.id)
             projects.append(project.to_dict())
+
+    def load_projects(self, projects):
+        for project in projects:
+            self.log.debug('creating project %s (%s)',
+                           project.name, project.id)
+            self.sdk.identity.create_project(**project)
 
     def export_roles(self, resources):
         roles = resources['roles'] = []
