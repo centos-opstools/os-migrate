@@ -17,7 +17,7 @@ class Datasource (base.Datasource):
         return resources
 
     def load(self, resources):
-        for rtype, rdata in resources.items:
+        for rtype, rdata in resources.items():
             importfunc = getattr(self, 'import_{}'.format(rtype), None)
             if importfunc is None:
                 self.log.warn('not able to import %s data', rtype)

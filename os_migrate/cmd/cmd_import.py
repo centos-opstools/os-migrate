@@ -82,10 +82,14 @@ def main():
             LOG.debug('skipping %s: no datafile', ext.name)
             continue
 
+        loader = ext.plugin(sdk)
+        if not hasattr(loader, 'load'):
+            LOG.debug('skipping %s: no load method', ext.name)
+            continue
+
         with open(datafile, 'r') as fd:
             LOG.info('importing {} data'.format(ext.name))
             data = json.load(fd)
-            loader = ext.plugin(sdk)
             loader.load(data)
 
     LOG.info('finished import')
