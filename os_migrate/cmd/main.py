@@ -4,7 +4,7 @@ from __future__ import absolute_import
 import cliff.app
 import cliff.commandmanager
 import logging
-import openstack
+from openstack import connection as openstack_connection
 import os_client_config
 import stevedore
 import sys
@@ -30,17 +30,7 @@ class OSMigrate(cliff.app.App):
         p = super(OSMigrate, self).build_option_parser(
             description, version, argparse_kwargs=argparse_kwargs)
 
-        p.add_argument('--list-drivers',
-                       action='store_true',
-                       help='List available migration drivers')
-        p.add_argument('--datadir', '-D',
-                       default='.',
-                       help='Specify location of data to import or export')
-        p.add_argument('--drivers',
-                       type=lambda x: x.split(','),
-                       default=[],
-                       help='Enable only specific drivers')
-
+        p = os_migrate.plugin.build_option_parser(p)
         # This adds all the openstack authentcation command line options
         self.occ.register_argparse_arguments(p, sys.argv)
 
@@ -52,7 +42,7 @@ class OSMigrate(cliff.app.App):
             return self._sdk
 
         cloud = self.occ.get_one_cloud(argparse=self.options)
-        _sdk = openstack.connection.from_config(cloud_config=cloud)
+        _sdk = openstack_connection.from_config(cloud_config=cloud)
         self._sdk = _sdk
 
         return _sdk

@@ -7,7 +7,8 @@ import cliff.command
 import os_migrate.cmd.base as base
 import os_migrate.exc as exc
 
-class Command(base.LoggingCommand, cliff.command.Command):
+
+class Command(base.MigrateCommand, cliff.command.Command):
 
     def __init__(self, *args, **kwargs):
         super(Command, self).__init__(*args, **kwargs)
@@ -20,7 +21,7 @@ class Command(base.LoggingCommand, cliff.command.Command):
         self.log.info('starting import of openstack data from %s',
                       datadir)
 
-        for ds in self.app.ds:
+        for ds in self.ds:
             enabled = ((not self.app.options.drivers)
                        or (ds.name in self.app.options.drivers))
             if not enabled:
@@ -32,7 +33,7 @@ class Command(base.LoggingCommand, cliff.command.Command):
                 self.log.debug('skipping %s: no data file', ds.name)
                 continue
 
-            loader = ds.plugin(self.app.sdk)
+            loader = ds.plugin(self.sdk)
 
             with open(datafile, 'r') as fd:
                 self.log.info('importing %s data', ds.name)

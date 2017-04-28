@@ -6,7 +6,8 @@ import json
 import cliff.command
 import os_migrate.cmd.base as base
 
-class Command(base.LoggingCommand, cliff.command.Command):
+
+class Command(base.MigrateCommand, cliff.command.Command):
 
     def __init__(self, *args, **kwargs):
         super(Command, self).__init__(*args, **kwargs)
@@ -16,14 +17,14 @@ class Command(base.LoggingCommand, cliff.command.Command):
         self.log.info('starting export of openstack data to %s',
                       datadir)
 
-        for ds in self.app.ds:
+        for ds in self.ds:
             enabled = ((not self.app.options.drivers)
                        or (ds.name in self.app.options.drivers))
             if not enabled:
                 self.log.debug('skipping %s: disabled', ds.name)
                 continue
 
-            dumper = ds.plugin(self.app.sdk)
+            dumper = ds.plugin(self.sdk)
 
             self.log.info('exporting %s data', ds.name)
             datafile = os.path.join(datadir, '{}.json'.format(ds.name))
