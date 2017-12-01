@@ -74,9 +74,16 @@ def main():
     for ext in mgr:
         enabled = ((not args.drivers) or (ext.name in args.drivers))
         if not enabled:
+            LOG.debug('skipping %s: disabled', ext.name)
             continue
-        LOG.info('exporting {} data'.format(ext.name))
+
         dumper = ext.plugin(sdk)
+
+        if not hasattr(dumper, 'store'):
+            LOG.debug('skipping %s: no store method', ext.name)
+            continue
+
+        LOG.info('exporting {} data'.format(ext.name))
         resources = dumper.store()
         with open(os.path.join(datadir,
                                '{}.json'.format(ext.name)), 'w') as fd:
