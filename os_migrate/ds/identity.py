@@ -1,5 +1,6 @@
 from __future__ import print_function,absolute_import
 
+import logging
 from . import base
 
 class Datasource (base.Datasource):
@@ -13,6 +14,13 @@ class Datasource (base.Datasource):
         self.export_users(resources)
 
         return resources
+
+    def import(self, resources):
+        for rtype, rdata in resources.items:
+            importfunc = getattr(self, 'import_{}'.format(rtype), None)
+            if importfunc is None:
+                self.log.warn('not able to import %s data', rtype)
+                continue
 
     def export_projects(self, resources):
         projects = resources['projects'] = []
