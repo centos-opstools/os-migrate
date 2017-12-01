@@ -1,4 +1,5 @@
-from __future__ import print_function, absolute_import
+from __future__ import print_function
+from __future__ import absolute_import
 
 import argparse
 import json
@@ -11,6 +12,7 @@ import sys
 
 LOG = logging.getLogger(__name__)
 occ = os_client_config.OpenStackConfig()
+
 
 def parse_args():
     p = argparse.ArgumentParser()
@@ -42,6 +44,7 @@ def parse_args():
     p.set_defaults(loglevel=logging.WARNING)
 
     return p.parse_args()
+
 
 def main():
     args = parse_args()
@@ -83,6 +86,6 @@ def main():
             LOG.info('importing {} data'.format(ext.name))
             data = json.load(fd)
             loader = ext.plugin(sdk)
-            loader.import(data)
+            loader.load(data)
 
     LOG.info('finished import')
