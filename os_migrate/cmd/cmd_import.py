@@ -32,7 +32,7 @@ class Command(base.LoggingCommand, cliff.command.Command):
                 self.log.debug('skipping %s: no data file', ds.name)
                 continue
 
-            loader = ds.plugin(self.app.sdk)
+            loader = ds.plugin(self.app.sdk, self.app)
 
             with open(datafile, 'r') as fd:
                 self.log.info('importing %s data', ds.name)

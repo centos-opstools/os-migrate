@@ -44,6 +44,10 @@ class OSMigrate(cliff.app.App):
         # This adds all the openstack authentcation command line options
         self.occ.register_argparse_arguments(p, sys.argv)
 
+        # Include datasource-specific options
+        for ds in self.ds:
+            ds.plugin.register_argparse_arguments(p)
+
         return p
 
     @property

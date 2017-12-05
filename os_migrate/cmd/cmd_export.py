@@ -2,7 +2,6 @@ from __future__ import print_function
 from __future__ import absolute_import
 
 import os
-import json
 import cliff.command
 import os_migrate.cmd.base as base
 
@@ -23,12 +22,10 @@ class Command(base.LoggingCommand, cliff.command.Command):
                 self.log.debug('skipping %s: disabled', ds.name)
                 continue
 
-            dumper = ds.plugin(self.app.sdk)
+            dumper = ds.plugin(self.app.sdk, self.app)
 
             self.log.info('exporting %s data', ds.name)
             datafile = os.path.join(datadir, '{}.json'.format(ds.name))
-            resources = dumper.store()
-            with open(datafile, 'w') as fd:
-                json.dump(resources, fd, indent=2)
+            dumper.store()
 
         self.log.info('finished export')
