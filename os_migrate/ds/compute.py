@@ -25,3 +25,6 @@ class Datasource (base.Datasource):
         flavors = resources['flavors'] = []
         for flavor in self.sdk.compute.flavors():
             flavors.append(flavor.to_dict())
+
+    def load(self, resources):
+        raise NotImplementedError('load')

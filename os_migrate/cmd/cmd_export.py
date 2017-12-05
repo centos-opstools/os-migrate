@@ -1,92 +1,34 @@
 from __future__ import print_function
 from __future__ import absolute_import
 
-import argparse
-import json
-import logging
-import openstack
 import os
-import os_client_config
-import stevedore
-import sys
+import json
+import cliff.command
+import os_migrate.cmd.base as base
 
-LOG = logging.getLogger(__name__)
-occ = os_client_config.OpenStackConfig()
+class Command(base.LoggingCommand, cliff.command.Command):
 
+    def __init__(self, *args, **kwargs):
+        super(Command, self).__init__(*args, **kwargs)
 
-def parse_args():
-    p = argparse.ArgumentParser()
+    def take_action(self, parsed_args):
+        datadir = os.path.abspath(self.app.options.datadir)
+        self.log.info('starting export of openstack data to %s',
+                      datadir)
 
-    p.add_argument('--list-drivers',
-                    action='store_true',
-                   help='List available migration drivers')
-    p.add_argument('--datadir', '-D',
-                   default='.',
-                   help='Specify location of data to import or export')
-    p.add_argument('--drivers',
-                   type=lambda x: x.split(','),
-                   default=[],
-                   help='Enable only specific drivers')
+        for ds in self.app.ds:
+            enabled = ((not self.app.options.drivers)
+                       or (ds.name in self.app.options.drivers))
+            if not enabled:
+                self.log.debug('skipping %s: disabled', ds.name)
+                continue
 
-    # This adds all the openstack authentcation command line options
-    occ.register_argparse_arguments(p, sys.argv)
+            dumper = ds.plugin(self.app.sdk)
 
-    g = p.add_argument_group('Logging options')
-    g.add_argument('--verbose', '-v',
-                   action='store_const',
-                   const=logging.INFO,
-                   dest='loglevel')
-    g.add_argument('--debug', '-d',
-                   action='store_const',
-                   const=logging.DEBUG,
-                   dest='loglevel')
+            self.log.info('exporting %s data', ds.name)
+            datafile = os.path.join(datadir, '{}.json'.format(ds.name))
+            resources = dumper.store()
+            with open(datafile, 'w') as fd:
+                json.dump(resources, fd, indent=2)
 
-    p.set_defaults(loglevel=logging.WARNING)
-
-    return p.parse_args()
-
-
-def main():
-    args = parse_args()
-    logging.basicConfig(level=args.loglevel)
-
-    mgr = stevedore.extension.ExtensionManager(
-        'openstack.migrate.datasource',
-    )
-
-    if args.list_drivers:
-        print('Available migration drivers:')
-        print()
-        for ext in mgr:
-            enabled = ((not args.drivers) or (ext.name in args.drivers))
-            print('{:10}: {} ({})'.format(
-                ext.name,
-                ext.plugin.description,
-                'enabled' if enabled else 'disabled'
-            ))
-        return
-
-    cloud = occ.get_one_cloud(argparse=args)
-    sdk = openstack.connection.from_config(cloud_config=cloud)
-
-    datadir = os.path.abspath(args.datadir)
-    LOG.info('starting export of openstack data to {}'.format(datadir))
-    for ext in mgr:
-        enabled = ((not args.drivers) or (ext.name in args.drivers))
-        if not enabled:
-            LOG.debug('skipping %s: disabled', ext.name)
-            continue
-
-        dumper = ext.plugin(sdk)
-
-        if not hasattr(dumper, 'store'):
-            LOG.debug('skipping %s: no store method', ext.name)
-            continue
-
-        LOG.info('exporting {} data'.format(ext.name))
-        resources = dumper.store()
-        with open(os.path.join(datadir,
-                               '{}.json'.format(ext.name)), 'w') as fd:
-            json.dump(resources, fd, indent=2)
-
-    LOG.info('finished export')
+        self.log.info('finished export')
