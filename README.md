@@ -25,11 +25,12 @@ A `clouds.yaml` file looks something like:
           username: admin
           tenant_name: admin
 
-Once you have a `clouds.yaml` file in place, you can export data from
-your cloud with a command like:
+Once you have a `clouds.yaml` file in place, you could use a command
+like the following to export all exportable data into a local folder
+named `data`:
 
     $ mkdir data
-    $ os-migrate --os-cloud undercloud -D data export
+    $ os-migrate export --os-cloud undercloud -D data
 
 Which will produce the following output:
 
